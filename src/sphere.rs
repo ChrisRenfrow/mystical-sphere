@@ -1,4 +1,4 @@
-use rand::{thread_rng, Rng};
+use rand::Rng;
 
 use crate::config::CfgAnswers;
 
@@ -27,8 +27,7 @@ impl Sphere {
         }
     }
 
-    pub fn get_answer(&self) -> Answer {
-        let mut rng = thread_rng();
+    pub fn get_answer(&self, rng: &mut impl Rng) -> Answer {
         let idx: usize = rng.gen_range(0..self.answers.len());
         self.answers[idx].clone()
     }

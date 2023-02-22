@@ -25,9 +25,8 @@ fn main() {
         Err(e) => panic!("Error: {:?}", e),
         Ok(_) => parse_config_at_path(&config_path),
     };
-    // dbg!(&config);
+    let mut rng = rand::thread_rng();
     let sphere = Sphere::new(config.answers);
-    // dbg!(&sphere);
-    let answer = sphere.get_answer();
+    let answer = sphere.get_answer(&mut rng);
     println!("Answer: {}", answer.text);
 }
