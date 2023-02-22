@@ -1,6 +1,10 @@
+use core::fmt;
+use std::fmt::Display;
+
 use rand::Rng;
 
 use crate::config::CfgAnswers;
+use colored::*;
 
 #[derive(Debug)]
 pub struct Sphere {
@@ -64,5 +68,15 @@ impl From<CfgAnswers> for Vec<Answer> {
             .flatten()
             .cloned()
             .collect()
+    }
+}
+
+impl Display for Answer {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match &self.flavor {
+            Flavor::Negative => write!(f, "{}", self.text.red().bold()),
+            Flavor::Neutral => write!(f, "{}", self.text.yellow().bold()),
+            Flavor::Affirmative => write!(f, "{}", self.text.green().bold()),
+        }
     }
 }
