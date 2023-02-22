@@ -8,12 +8,12 @@ use serde::Deserialize;
 
 use crate::DEFAULT_CONFIG_CONTENTS;
 
-#[derive(Debug, Deserialize, PartialEq)]
+#[derive(Debug, Deserialize, Eq, PartialEq)]
 pub struct Config {
     pub answers: CfgAnswers,
 }
 
-#[derive(Debug, Deserialize, PartialEq)]
+#[derive(Debug, Deserialize, Eq, PartialEq)]
 pub struct CfgAnswers {
     pub affirmative: Vec<String>,
     pub neutral: Vec<String>,

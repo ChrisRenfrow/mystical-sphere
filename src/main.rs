@@ -11,7 +11,12 @@ use shellexpand::tilde;
 
 fn main() {
     let args = Cli::parse();
-    let config_path: String = tilde(&args.config.unwrap_or(DEFAULT_CONFIG_PATH.to_string())).into();
+    let config_path: String = tilde(
+        &args
+            .config
+            .unwrap_or_else(|| DEFAULT_CONFIG_PATH.to_string()),
+    )
+    .into();
     let config: Config = match File::open(&config_path) {
         Err(ref e) if e.kind() == ErrorKind::NotFound => {
             create_default_cfg(&config_path);
