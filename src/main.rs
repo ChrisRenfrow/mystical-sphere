@@ -29,8 +29,7 @@ fn main() {
     };
     let sphere = Sphere::new(config.answers);
 
-    // If interactive was specified, and is not true
-    if args.interactive.is_some() && !args.interactive.unwrap() {
+    if args.quiet {
         let mut rng = rand::thread_rng();
         println!("{}", sphere.get_answer(&mut rng));
     } else {
