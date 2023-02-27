@@ -1,6 +1,6 @@
 use std::{
     fs::File,
-    io::{self, stdin, ErrorKind},
+    io::{self, ErrorKind},
     process::exit,
     thread,
     time::Duration,
@@ -12,18 +12,13 @@ use mystical_sphere::{
     cli::Cli,
     config::{create_default_cfg, parse_config_at_path, Config},
     sphere::Sphere,
-    DEFAULT_CONFIG_CONTENTS, DEFAULT_CONFIG_PATH,
+    DEFAULT_CONFIG_CONTENTS,
 };
 use shellexpand::tilde;
 
 fn main() {
     let args = Cli::parse();
-    let config_path: String = tilde(
-        &args
-            .config
-            .unwrap_or_else(|| DEFAULT_CONFIG_PATH.to_string()),
-    )
-    .into();
+    let config_path: String = tilde(&args.config).into();
     let config: Config = match File::open(&config_path) {
         Err(ref e) if e.kind() == ErrorKind::NotFound => {
             create_default_cfg(&config_path);
@@ -34,7 +29,15 @@ fn main() {
     };
     let sphere = Sphere::new(config.answers);
 
-    run(sphere);
+    // If interactive was specified, and is not true
+    if args.interactive.is_some() && !args.interactive.unwrap() {
+        let mut rng = rand::thread_rng();
+        println!("{}", sphere.get_answer(&mut rng));
+    } else {
+        run(sphere);
+    }
+
+    exit(0);
 }
 
 enum State {
