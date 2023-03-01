@@ -56,6 +56,7 @@ fn run(sphere: Sphere) -> Result<(), io::Error> {
     let mut state = State::Intro;
     let mut rng = rand::thread_rng();
     let mut w = io::stdout();
+    let mut restarted = false;
 
     execute!(
         w,
@@ -75,7 +76,13 @@ fn run(sphere: Sphere) -> Result<(), io::Error> {
             State::Input => {
                 let mut buffer = String::new();
                 let stdin = io::stdin();
-                sphere_say(&mut w, format!("To begin, please enter a yes or no question for me to answer. If you do not wish to disclose your question to me, you may hold the question firmly in mind before pressing {}.", "Enter".purple()).to_string())?;
+                sphere_say(
+                    &mut w,
+                    format!("To begin, please enter a yes or no question for me to answer."),
+                )?;
+                if !restarted {
+                    sphere_say(&mut w, format!("If you do not wish to disclose your question to me, you may hold the question firmly in mind before pressing {}.", "Enter".purple()).to_string())?;
+                }
                 execute!(&mut w, cursor::MoveToNextLine(1), cursor::EnableBlinking)?;
                 match stdin.read_line(&mut buffer) {
                     Ok(_) => {
@@ -113,6 +120,7 @@ fn run(sphere: Sphere) -> Result<(), io::Error> {
                             &mut w,
                             "You wish to tempt the fates again? Very well...".to_string(),
                         )?;
+                        restarted = true;
                         state = State::Input;
                     }
                     _ => {
@@ -150,13 +158,14 @@ where
 {
     const OBSC_CHARS: &[char] = &['░', '▒', '▓', '█', '■', '▄', '▌', '▐', '▀'];
     let answer_str = &answer.text;
-    let mut sequence: Vec<usize> = (0..answer_str.len()).collect();
-    sequence.shuffle(rng);
+    let mut sequence: Vec<(usize, char)> = (0..answer_str.len()).zip(answer_str.chars()).collect();
     let y_pos = cursor::position().unwrap().1;
+
+    sequence.shuffle(rng);
 
     execute!(w, cursor::Hide)?;
     // Disperse obscuring characters
-    for i in &sequence {
+    for (i, _) in &sequence {
         execute!(
             w,
             cursor::MoveTo(*i as u16, y_pos),
@@ -167,13 +176,17 @@ where
     // Dramatic pause
     thread::sleep(Duration::from_millis(1500));
     // Begin revealing characters
-    for i in sequence.iter().rev() {
-        execute!(
-            w,
-            cursor::MoveTo(*i as u16, y_pos),
-            Print(answer_str.chars().nth(*i).unwrap())
-        )?;
-        thread::sleep(Duration::from_millis(rng.gen_range(100..=300)));
+    while let Some((i, l)) = sequence.pop() {
+        execute!(w, cursor::MoveTo(i as u16, y_pos), Print(l),)?;
+        thread::sleep(Duration::from_millis({
+            // Reveal them faster as the remainder grows smaller
+            match sequence.len() {
+                0..=5 => 20,
+                6..=10 => 50,
+                11..=20 => 100,
+                _ => 200,
+            }
+        }));
     }
     thread::sleep(Duration::from_millis(200));
     // Re-print with color now that it's fully revealed.
