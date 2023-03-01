@@ -1,5 +1,7 @@
 # Mystical Sphere ("Magic 8-ball")
 
+![Demo gif](./assets/demo.gif)
+
 I wanted to make something kind of silly to learn more about Rust and this is what I came up with. A multi-platform, multi-front-end toy program that emulates the behavior of a Magic 8-ball, but configurable!
 
 ## Why?
